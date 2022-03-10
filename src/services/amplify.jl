@@ -23,6 +23,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"autoBranchCreationPatterns"`:  The automated branch creation glob patterns for an
   Amplify app.
 - `"basicAuthCredentials"`:  The credentials for basic authorization for an Amplify app.
+  You must base64-encode the authorization credentials and provide them in the format
+  user:password.
 - `"buildSpec"`:  The build specification (build spec) for an Amplify app.
 - `"customHeaders"`: The custom HTTP headers for an Amplify app.
 - `"customRules"`:  The custom rewrite and redirect rules for an Amplify app.
@@ -123,7 +125,8 @@ end
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"backendEnvironmentArn"`:  The Amazon Resource Name (ARN) for a backend environment that
   is part of an Amplify app.
-- `"basicAuthCredentials"`:  The basic authorization credentials for the branch.
+- `"basicAuthCredentials"`:  The basic authorization credentials for the branch. You must
+  base64-encode the authorization credentials and provide them in the format user:password.
 - `"buildSpec"`:  The build specification (build spec) for the branch.
 - `"description"`:  The description for the branch.
 - `"displayName"`:  The display name for a branch. This is used as the default domain
@@ -1302,7 +1305,9 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   app.
 - `"autoBranchCreationPatterns"`:  Describes the automated branch creation glob patterns
   for an Amplify app.
-- `"basicAuthCredentials"`:  The basic authorization credentials for an Amplify app.
+- `"basicAuthCredentials"`:  The basic authorization credentials for an Amplify app. You
+  must base64-encode the authorization credentials and provide them in the format
+  user:password.
 - `"buildSpec"`:  The build specification (build spec) for an Amplify app.
 - `"customHeaders"`: The custom HTTP headers for an Amplify app.
 - `"customRules"`:  The custom redirect and rewrite rules for an Amplify app.
@@ -1353,7 +1358,8 @@ end
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"backendEnvironmentArn"`:  The Amazon Resource Name (ARN) for a backend environment that
   is part of an Amplify app.
-- `"basicAuthCredentials"`:  The basic authorization credentials for the branch.
+- `"basicAuthCredentials"`:  The basic authorization credentials for the branch. You must
+  base64-encode the authorization credentials and provide them in the format user:password.
 - `"buildSpec"`:  The build specification (build spec) for the branch.
 - `"description"`:  The description for the branch.
 - `"displayName"`:  The display name for a branch. This is used as the default domain
@@ -1396,15 +1402,14 @@ function update_branch(
 end
 
 """
-    update_domain_association(app_id, domain_name, sub_domain_settings)
-    update_domain_association(app_id, domain_name, sub_domain_settings, params::Dict{String,<:Any})
+    update_domain_association(app_id, domain_name)
+    update_domain_association(app_id, domain_name, params::Dict{String,<:Any})
 
  Creates a new domain association for an Amplify app.
 
 # Arguments
 - `app_id`:  The unique ID for an Amplify app.
 - `domain_name`:  The name of the domain.
-- `sub_domain_settings`:  Describes the settings for the subdomain.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
@@ -1413,14 +1418,14 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"autoSubDomainIAMRole"`:  The required AWS Identity and Access Management (IAM) service
   role for the Amazon Resource Name (ARN) for automatically creating subdomains.
 - `"enableAutoSubDomain"`:  Enables the automated creation of subdomains for branches.
+- `"subDomainSettings"`:  Describes the settings for the subdomain.
 """
 function update_domain_association(
-    appId, domainName, subDomainSettings; aws_config::AbstractAWSConfig=global_aws_config()
+    appId, domainName; aws_config::AbstractAWSConfig=global_aws_config()
 )
     return amplify(
         "POST",
-        "/apps/$(appId)/domains/$(domainName)",
-        Dict{String,Any}("subDomainSettings" => subDomainSettings);
+        "/apps/$(appId)/domains/$(domainName)";
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )
@@ -1428,18 +1433,13 @@ end
 function update_domain_association(
     appId,
     domainName,
-    subDomainSettings,
     params::AbstractDict{String};
     aws_config::AbstractAWSConfig=global_aws_config(),
 )
     return amplify(
         "POST",
         "/apps/$(appId)/domains/$(domainName)",
-        Dict{String,Any}(
-            mergewith(
-                _merge, Dict{String,Any}("subDomainSettings" => subDomainSettings), params
-            ),
-        );
+        params;
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )

@@ -148,6 +148,31 @@ function describe_anomaly(
 end
 
 """
+    describe_event_sources_config()
+    describe_event_sources_config(params::Dict{String,<:Any})
+
+This operation lists details about a DevOps Guru event source that is shared with
+your&#x2028; account.
+
+"""
+function describe_event_sources_config(; aws_config::AbstractAWSConfig=global_aws_config())
+    return devops_guru(
+        "POST", "/event-sources"; aws_config=aws_config, feature_set=SERVICE_FEATURE_SET
+    )
+end
+function describe_event_sources_config(
+    params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return devops_guru(
+        "POST",
+        "/event-sources",
+        params;
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
     describe_feedback()
     describe_feedback(params::Dict{String,<:Any})
 
@@ -952,6 +977,33 @@ function start_cost_estimation(
                 params,
             ),
         );
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
+    update_event_sources_config()
+    update_event_sources_config(params::Dict{String,<:Any})
+
+Updates the event source configuration.
+
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"EventSources"`: The name of the event source.
+"""
+function update_event_sources_config(; aws_config::AbstractAWSConfig=global_aws_config())
+    return devops_guru(
+        "PUT", "/event-sources"; aws_config=aws_config, feature_set=SERVICE_FEATURE_SET
+    )
+end
+function update_event_sources_config(
+    params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return devops_guru(
+        "PUT",
+        "/event-sources",
+        params;
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
     )

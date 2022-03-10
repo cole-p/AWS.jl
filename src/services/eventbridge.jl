@@ -1451,7 +1451,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   accounts.
 - `"StatementId"`: An identifier string for the external account that you are granting
   permissions to. If you later want to revoke the permission for this external account,
-  specify this StatementId when you run RemovePermission.
+  specify this StatementId when you run RemovePermission.  Each StatementId must be unique.
 """
 function put_permission(; aws_config::AbstractAWSConfig=global_aws_config())
     return eventbridge(
@@ -1550,17 +1550,18 @@ end
 
 Adds the specified targets to the specified rule, or updates the targets if they are
 already associated with the rule. Targets are the resources that are invoked when a rule is
-triggered. You can configure the following as targets for Events:    API destination
-Amazon API Gateway REST API endpoints   API Gateway   Batch job queue   CloudWatch Logs
-group   CodeBuild project   CodePipeline   Amazon EC2 CreateSnapshot API call   Amazon EC2
-RebootInstances API call   Amazon EC2 StopInstances API call   Amazon EC2
+triggered.  Each rule can have up to five (5) targets associated with it at one time.  You
+can configure the following as targets for Events:    API destination    Amazon API Gateway
+REST API endpoints   API Gateway   Batch job queue   CloudWatch Logs group   CodeBuild
+project   CodePipeline   Amazon EC2 CreateSnapshot API call   EC2 Image Builder   Amazon
+EC2 RebootInstances API call   Amazon EC2 StopInstances API call   Amazon EC2
 TerminateInstances API call   Amazon ECS tasks   Event bus in a different Amazon Web
 Services account or Region. You can use an event bus in the US East (N. Virginia)
 us-east-1, US West (Oregon) us-west-2, or Europe (Ireland) eu-west-1 Regions as a target
 for a rule.   Firehose delivery stream (Kinesis Data Firehose)   Inspector assessment
 template (Amazon Inspector)   Kinesis stream (Kinesis Data Stream)   Lambda function
 Redshift clusters (Data API statement execution)   Amazon SNS topic   Amazon SQS queues
-(includes FIFO queues   SSM Automation   SSM OpsItem   SSM Run Command   Step Functions
+(includes FIFO queues)   SSM Automation   SSM OpsItem   SSM Run Command   Step Functions
 state machines   Creating rules with built-in targets is supported only in the Amazon Web
 Services Management Console. The built-in targets are EC2 CreateSnapshot API call, EC2
 RebootInstances API call, EC2 StopInstances API call, and EC2 TerminateInstances API call.
@@ -1674,11 +1675,13 @@ end
     remove_targets(ids, rule, params::Dict{String,<:Any})
 
 Removes the specified targets from the specified rule. When the rule is triggered, those
-targets are no longer be invoked. When you remove a target, when the associated rule
-triggers, removed targets might continue to be invoked. Allow a short period of time for
-changes to take effect. This action can partially fail if too many requests are made at the
-same time. If that happens, FailedEntryCount is non-zero in the response and each entry in
-FailedEntries provides the ID of the failed target and the error code.
+targets are no longer be invoked.  A successful execution of RemoveTargets doesn't
+guarantee all targets are removed from the rule, it means that the target(s) listed in the
+request are removed.  When you remove a target, when the associated rule triggers, removed
+targets might continue to be invoked. Allow a short period of time for changes to take
+effect. This action can partially fail if too many requests are made at the same time. If
+that happens, FailedEntryCount is non-zero in the response and each entry in FailedEntries
+provides the ID of the failed target and the error code.
 
 # Arguments
 - `ids`: The IDs of the targets to remove from the rule.

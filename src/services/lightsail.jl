@@ -1086,8 +1086,8 @@ Content delivery networks in Amazon Lightsail.
   distribution.
 - `distribution_name`: The name for the distribution.
 - `origin`: An object that describes the origin resource for the distribution, such as a
-  Lightsail instance or load balancer. The distribution pulls, caches, and serves content
-  from the origin.
+  Lightsail instance, bucket, or load balancer. The distribution pulls, caches, and serves
+  content from the origin.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
@@ -1478,8 +1478,11 @@ end
     create_key_pair(key_pair_name)
     create_key_pair(key_pair_name, params::Dict{String,<:Any})
 
-Creates an SSH key pair. The create key pair operation supports tag-based access control
-via request tags. For more information, see the Amazon Lightsail Developer Guide.
+Creates a custom SSH key pair that you can use with an Amazon Lightsail instance.  Use the
+DownloadDefaultKeyPair action to create a Lightsail default key pair in an Amazon Web
+Services Region where a default key pair does not currently exist.  The create key pair
+operation supports tag-based access control via request tags. For more information, see the
+Amazon Lightsail Developer Guide.
 
 # Arguments
 - `key_pair_name`: The name for your new key pair.
@@ -2511,13 +2514,22 @@ end
     delete_key_pair(key_pair_name)
     delete_key_pair(key_pair_name, params::Dict{String,<:Any})
 
-Deletes a specific SSH key pair. The delete key pair operation supports tag-based access
+Deletes the specified key pair by removing the public key from Amazon Lightsail. You can
+delete key pairs that were created using the ImportKeyPair and CreateKeyPair actions, as
+well as the Lightsail default key pair. A new default key pair will not be created unless
+you launch an instance without specifying a custom key pair, or you call the
+DownloadDefaultKeyPair API.  The delete key pair operation supports tag-based access
 control via resource tags applied to the resource identified by key pair name. For more
 information, see the Amazon Lightsail Developer Guide.
 
 # Arguments
 - `key_pair_name`: The name of the key pair to delete.
 
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"expectedFingerprint"`: The RSA fingerprint of the Lightsail default key pair to delete.
+   The expectedFingerprint parameter is required only when specifying to delete a Lightsail
+  default key pair.
 """
 function delete_key_pair(keyPairName; aws_config::AbstractAWSConfig=global_aws_config())
     return lightsail(
@@ -2987,7 +2999,9 @@ end
     download_default_key_pair()
     download_default_key_pair(params::Dict{String,<:Any})
 
-Downloads the default SSH key pair from the user's account.
+Downloads the regional Amazon Lightsail default key pair. This action also creates a
+Lightsail default key pair if a default key pair does not currently exist in the Amazon Web
+Services Region.
 
 """
 function download_default_key_pair(; aws_config::AbstractAWSConfig=global_aws_config())
@@ -4694,6 +4708,8 @@ Returns information about all key pairs in the user's account.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"includeDefaultKeyPair"`: A Boolean value that indicates whether to include the default
+  key pair in the response of your request.
 - `"pageToken"`: The token to advance to the next page of results from your request. To get
   a page token, perform an initial GetKeyPairs request. If your results are paginated, the
   response will return a next page token that you can specify as the page token in a
@@ -6888,8 +6904,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   distribution.
 - `"isEnabled"`: Indicates whether to enable the distribution.
 - `"origin"`: An object that describes the origin resource for the distribution, such as a
-  Lightsail instance or load balancer. The distribution pulls, caches, and serves content
-  from the origin.
+  Lightsail instance, bucket, or load balancer. The distribution pulls, caches, and serves
+  content from the origin.
 """
 function update_distribution(
     distributionName; aws_config::AbstractAWSConfig=global_aws_config()

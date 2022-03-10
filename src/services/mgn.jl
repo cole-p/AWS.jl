@@ -67,24 +67,24 @@ Creates a new ReplicationConfigurationTemplate.
   creation.
 - `data_plane_routing`: Request to configure data plane routing during Replication Settings
   template creation.
-- `default_large_staging_disk_type`: Request to configure the Staging Disk EBS volume type
-  to \"gp2\" during Replication Settings template creation.
-- `ebs_encryption`: Request to configure EBS enryption during Replication Settings template
-  creation.
+- `default_large_staging_disk_type`: Request to configure the default large staging disk
+  EBS volume type during Replication Settings template creation.
+- `ebs_encryption`: Request to configure EBS encryption during Replication Settings
+  template creation.
 - `replication_server_instance_type`: Request to configure the Replication Server instance
   type during Replication Settings template creation.
 - `replication_servers_security_groups_ids`: Request to configure the Replication Server
-  Secuirity group ID during Replication Settings template creation.
+  Security group ID during Replication Settings template creation.
 - `staging_area_subnet_id`: Request to configure the Staging Area subnet ID during
   Replication Settings template creation.
-- `staging_area_tags`: Request to configure Staiging Area tags during Replication Settings
+- `staging_area_tags`: Request to configure Staging Area tags during Replication Settings
   template creation.
 - `use_dedicated_replication_server`: Request to use Dedicated Replication Servers during
   Replication Settings template creation.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
-- `"ebsEncryptionKeyArn"`: Request to configure an EBS enryption key during Replication
+- `"ebsEncryptionKeyArn"`: Request to configure an EBS encryption key during Replication
   Settings template creation.
 - `"tags"`: Request to configure tags during Replication Settings template creation.
 """
@@ -284,7 +284,7 @@ end
     delete_vcenter_client(vcenter_client_id)
     delete_vcenter_client(vcenter_client_id, params::Dict{String,<:Any})
 
-Deletes a single vCenter client by ID.
+Deletes a given vCenter client by ID.
 
 # Arguments
 - `vcenter_client_id`: ID of resource to be deleted.
@@ -323,7 +323,7 @@ end
     describe_job_log_items(job_id)
     describe_job_log_items(job_id, params::Dict{String,<:Any})
 
-Retrieves detailed Job log with paging.
+Retrieves detailed job log items with paging.
 
 # Arguments
 - `job_id`: Request to describe Job log job ID.
@@ -360,17 +360,17 @@ end
 
 Returns a list of Jobs. Use the JobsID and fromDate and toData filters to limit which jobs
 are returned. The response is sorted by creationDataTime - latest date first. Jobs are
-normaly created by the StartTest, StartCutover, and TerminateTargetInstances APIs. Jobs are
-also created by DiagnosticLaunch and TerminateDiagnosticInstances, which are APIs available
-only to *Support* and only used in response to relevant support tickets.
+normally created by the StartTest, StartCutover, and TerminateTargetInstances APIs. Jobs
+are also created by DiagnosticLaunch and TerminateDiagnosticInstances, which are APIs
+available only to *Support* and only used in response to relevant support tickets.
 
 # Arguments
 - `filters`: Request to describe Job log filters.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
-- `"maxResults"`: Request to describe Job log by max results.
-- `"nextToken"`: Request to describe Job logby next token.
+- `"maxResults"`: Request to describe job log items by max results.
+- `"nextToken"`: Request to describe job log items by next token.
 """
 function describe_jobs(filters; aws_config::AbstractAWSConfig=global_aws_config())
     return mgn(
@@ -483,7 +483,7 @@ end
     describe_vcenter_clients()
     describe_vcenter_clients(params::Dict{String,<:Any})
 
-Lists all vCenter clients.
+Returns a list of the installed vCenter clients.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
@@ -518,12 +518,12 @@ Disconnects specific Source Servers from Application Migration Service. Data rep
 stopped immediately. All AWS resources created by Application Migration Service for
 enabling the replication of these source servers will be terminated / deleted within 90
 minutes. Launched Test or Cutover instances will NOT be terminated. If the agent on the
-source server has not been prevented from communciating with the Application Migration
+source server has not been prevented from communicating with the Application Migration
 Service service, then it will receive a command to uninstall itself (within approximately
 10 minutes). The following properties of the SourceServer will be changed immediately:
 dataReplicationInfo.dataReplicationState will be set to DISCONNECTED; The totalStorageBytes
 property for each of dataReplicationInfo.replicatedDisks will be set to zero;
-dataReplicationInfo.lagDuration and dataReplicationInfo.lagDurationwill be nullified.
+dataReplicationInfo.lagDuration and dataReplicationInfo.lagDuration will be nullified.
 
 # Arguments
 - `source_server_id`: Request to disconnect Source Server from service by Server ID.
@@ -565,13 +565,13 @@ Application Migration Service for enabling the replication of these source serve
 terminated / deleted within 90 minutes. Launched Test or Cutover instances will NOT be
 terminated. The AWS Replication Agent will receive a command to uninstall itself (within 10
 minutes). The following properties of the SourceServer will be changed immediately:
-dataReplicationInfo.dataReplicationState will be to DISCONNECTED; The
+dataReplicationInfo.dataReplicationState will be changed to DISCONNECTED; The
 SourceServer.lifeCycle.state will be changed to CUTOVER; The totalStorageBytes property fo
 each of dataReplicationInfo.replicatedDisks will be set to zero;
-dataReplicationInfo.lagDuration and dataReplicationInfo.lagDurationwill be nullified.
+dataReplicationInfo.lagDuration and dataReplicationInfo.lagDuration will be nullified.
 
 # Arguments
-- `source_server_id`: Request to finalize Cutover by Soure Server ID.
+- `source_server_id`: Request to finalize Cutover by Source Server ID.
 
 """
 function finalize_cutover(sourceServerID; aws_config::AbstractAWSConfig=global_aws_config())
@@ -643,7 +643,7 @@ end
 Lists all ReplicationConfigurations, filtered by Source Server ID.
 
 # Arguments
-- `source_server_id`: Request to get Replication Configuaration by Source Server ID.
+- `source_server_id`: Request to get Replication Configuration by Source Server ID.
 
 """
 function get_replication_configuration(
@@ -737,7 +737,7 @@ end
 
 Archives specific Source Servers by setting the SourceServer.isArchived property to true
 for specified SourceServers by ID. This command only works for SourceServers with a
-lifecycle.state which equals DISCONNECTED or CUTOVER.
+lifecycle. state which equals DISCONNECTED or CUTOVER.
 
 # Arguments
 - `source_server_id`: Mark as archived by Source Server ID.
@@ -854,7 +854,7 @@ end
     start_replication(source_server_id)
     start_replication(source_server_id, params::Dict{String,<:Any})
 
-Starts replication on source server by ID.
+Starts replication for SNAPSHOT_SHIPPING agents.
 
 # Arguments
 - `source_server_id`: ID of source server on which to start replication.
@@ -891,9 +891,9 @@ end
     start_test(source_server_ids)
     start_test(source_server_ids, params::Dict{String,<:Any})
 
-Lauches a Test Instance for specific Source Servers. This command starts a LAUNCH job whose
-initiatedBy property is StartTest and changes the SourceServer.lifeCycle.state property to
-TESTING.
+Launches a Test Instance for specific Source Servers. This command starts a LAUNCH job
+whose initiatedBy property is StartTest and changes the SourceServer.lifeCycle.state
+property to TESTING.
 
 # Arguments
 - `source_server_ids`: Start Test for Source Server IDs.
@@ -1060,6 +1060,7 @@ Updates multiple LaunchConfigurations by Source Server ID.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"bootMode"`: Update Launch configuration boot mode request.
 - `"copyPrivateIp"`: Update Launch configuration copy Private IP request.
 - `"copyTags"`: Update Launch configuration copy Tags request.
 - `"launchDisposition"`: Update Launch configuration launch disposition request.
@@ -1228,7 +1229,8 @@ end
     update_source_server_replication_type(replication_type, source_server_id)
     update_source_server_replication_type(replication_type, source_server_id, params::Dict{String,<:Any})
 
-Updates source server Replication Type by ID.
+Allows you to change between the AGENT_BASED replication type and the SNAPSHOT_SHIPPING
+replication type.
 
 # Arguments
 - `replication_type`: Replication type to which to update source server.

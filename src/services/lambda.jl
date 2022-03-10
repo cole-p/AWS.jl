@@ -2616,10 +2616,16 @@ end
 
 Updates a Lambda function's code. If code signing is enabled for the function, the code
 package must be signed by a trusted publisher. For more information, see Configuring code
-signing. The function's code is locked when you publish a version. You can't modify the
-code of a published version, only the unpublished version.  For a function defined as a
-container image, Lambda resolves the image tag to an image digest. In Amazon ECR, if you
-update the image tag to a new image, Lambda does not automatically update the function.
+signing. If the function's package type is Image, you must specify the code package in
+ImageUri as the URI of a container image in the Amazon ECR registry.  If the function's
+package type is Zip, you must specify the deployment package as a .zip file archive. Enter
+the Amazon S3 bucket and key of the code .zip file location. You can also provide the
+function code inline using the ZipFile field.  The code in the deployment package must be
+compatible with the target instruction set architecture of the function (x86-64 or arm64).
+The function's code is locked when you publish a version. You can't modify the code of a
+published version, only the unpublished version.  For a function defined as a container
+image, Lambda resolves the image tag to an image digest. In Amazon ECR, if you update the
+image tag to a new image, Lambda does not automatically update the function.
 
 # Arguments
 - `function_name`: The name of the Lambda function.  Name formats     Function name -
@@ -2634,19 +2640,23 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   string array with one of the valid values (arm64 or x86_64). The default value is x86_64.
 - `"DryRun"`: Set to true to validate the request parameters and access permissions without
   modifying the function code.
-- `"ImageUri"`: URI of a container image in the Amazon ECR registry.
+- `"ImageUri"`: URI of a container image in the Amazon ECR registry. Do not use for a
+  function defined with a .zip file archive.
 - `"Publish"`: Set to true to publish a new version of the function after updating the
   code. This has the same effect as calling PublishVersion separately.
 - `"RevisionId"`: Only update the function if the revision ID matches the ID that's
   specified. Use this option to avoid modifying a function that has changed since you last
   read it.
 - `"S3Bucket"`: An Amazon S3 bucket in the same Amazon Web Services Region as your
-  function. The bucket can be in a different Amazon Web Services account.
-- `"S3Key"`: The Amazon S3 key of the deployment package.
+  function. The bucket can be in a different Amazon Web Services account. Use only with a
+  function defined with a .zip file archive deployment package.
+- `"S3Key"`: The Amazon S3 key of the deployment package. Use only with a function defined
+  with a .zip file archive deployment package.
 - `"S3ObjectVersion"`: For versioned objects, the version of the deployment package object
   to use.
 - `"ZipFile"`: The base64-encoded contents of the deployment package. Amazon Web Services
-  SDK and Amazon Web Services CLI clients handle the encoding for you.
+  SDK and Amazon Web Services CLI clients handle the encoding for you. Use only with a
+  function defined with a .zip file archive deployment package.
 """
 function update_function_code(
     FunctionName; aws_config::AbstractAWSConfig=global_aws_config()

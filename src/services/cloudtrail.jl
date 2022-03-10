@@ -53,10 +53,10 @@ end
     cancel_query(event_data_store, query_id)
     cancel_query(event_data_store, query_id, params::Dict{String,<:Any})
 
-Cancels a query if the query is not in a terminated state, such as CANCELLED, FAILED or
-FINISHED. You must specify an ARN value for EventDataStore. The ID of the query that you
-want to cancel is also required. When you run CancelQuery, the query status might show as
-CANCELLED even if the operation is not yet finished.
+Cancels a query if the query is not in a terminated state, such as CANCELLED, FAILED,
+TIMED_OUT, or FINISHED. You must specify an ARN value for EventDataStore. The ID of the
+query that you want to cancel is also required. When you run CancelQuery, the query status
+might show as CANCELLED even if the operation is not yet finished.
 
 # Arguments
 - `event_data_store`: The ARN (or the ID suffix of the ARN) of an event data store on which
@@ -228,12 +228,13 @@ end
     delete_event_data_store(event_data_store, params::Dict{String,<:Any})
 
 Disables the event data store specified by EventDataStore, which accepts an event data
-store ARN. After you run DeleteEventDataStore, the event data store is automatically
-deleted after a wait period of seven days. TerminationProtectionEnabled must be set to
-False on the event data store; this operation cannot work if TerminationProtectionEnabled
-is True. After you run DeleteEventDataStore on an event data store, you cannot run
-ListQueries, DescribeQuery, or GetQueryResults on queries that are using an event data
-store in a PENDING_DELETION state.
+store ARN. After you run DeleteEventDataStore, the event data store enters a
+PENDING_DELETION state, and is automatically deleted after a wait period of seven days.
+TerminationProtectionEnabled must be set to False on the event data store; this operation
+cannot work if TerminationProtectionEnabled is True. After you run DeleteEventDataStore on
+an event data store, you cannot run ListQueries, DescribeQuery, or GetQueryResults on
+queries that are using an event data store in a PENDING_DELETION state. An event data store
+in the PENDING_DELETION state does not incur costs.
 
 # Arguments
 - `event_data_store`: The ARN (or the ID suffix of the ARN) of the event data store to
@@ -687,7 +688,7 @@ Returns a list of queries and query statuses for the past seven days. You must s
 ARN value for EventDataStore. Optionally, to shorten the list of results, you can specify a
 time range, formatted as timestamps, by adding StartTime and EndTime parameters, and a
 QueryStatus value. Valid values for QueryStatus include QUEUED, RUNNING, FINISHED, FAILED,
-or CANCELLED.
+TIMED_OUT, or CANCELLED.
 
 # Arguments
 - `event_data_store`: The ARN (or the ID suffix of the ARN) of an event data store on which
@@ -700,7 +701,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"MaxResults"`: The maximum number of queries to show on a page.
 - `"NextToken"`: A token you can use to get the next page of results.
 - `"QueryStatus"`: The status of queries that you want to return in results. Valid values
-  for QueryStatus include QUEUED, RUNNING, FINISHED, FAILED, or CANCELLED.
+  for QueryStatus include QUEUED, RUNNING, FINISHED, FAILED, TIMED_OUT, or CANCELLED.
 - `"StartTime"`: Use with EndTime to bound a ListQueries request, and limit its results to
   only those queries run within a specified time period.
 """

@@ -341,6 +341,9 @@ const kafkaconnect = AWS.RestJSONService("kafkaconnect", "kafkaconnect", "2021-0
 const kendra = AWS.JSONService(
     "kendra", "kendra", "2019-02-03", "1.1", "AWSKendraFrontendService"
 )
+const keyspaces = AWS.JSONService(
+    "cassandra", "cassandra", "2022-02-10", "1.0", "KeyspacesService"
+)
 const kinesis = AWS.JSONService(
     "kinesis", "kinesis", "2013-12-02", "1.1", "Kinesis_20131202"
 )

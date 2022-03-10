@@ -319,16 +319,18 @@ end
 
 Completes the lifecycle action for the specified token or instance with the specified
 result. This step is a part of the procedure for adding a lifecycle hook to an Auto Scaling
-group:   (Optional) Create a Lambda function and a rule that allows Amazon EventBridge to
-invoke your Lambda function when Amazon EC2 Auto Scaling launches or terminates instances.
- (Optional) Create a notification target and an IAM role. The target can be either an
-Amazon SQS queue or an Amazon SNS topic. The role allows Amazon EC2 Auto Scaling to publish
-lifecycle notifications to the target.   Create the lifecycle hook. Specify whether the
-hook is used when the instances launch or terminate.   If you need more time, record the
-lifecycle action heartbeat to keep the instance in a pending state.    If you finish before
-the timeout period ends, send a callback by using the CompleteLifecycleAction API call.
-For more information, see Amazon EC2 Auto Scaling lifecycle hooks in the Amazon EC2 Auto
-Scaling User Guide.
+group:   (Optional) Create a launch template or launch configuration with a user data
+script that runs while an instance is in a wait state due to a lifecycle hook.   (Optional)
+Create a Lambda function and a rule that allows Amazon EventBridge to invoke your Lambda
+function when an instance is put into a wait state due to a lifecycle hook.   (Optional)
+Create a notification target and an IAM role. The target can be either an Amazon SQS queue
+or an Amazon SNS topic. The role allows Amazon EC2 Auto Scaling to publish lifecycle
+notifications to the target.   Create the lifecycle hook. Specify whether the hook is used
+when the instances launch or terminate.   If you need more time, record the lifecycle
+action heartbeat to keep the instance in a wait state.    If you finish before the timeout
+period ends, send a callback by using the CompleteLifecycleAction API call.    For more
+information, see Amazon EC2 Auto Scaling lifecycle hooks in the Amazon EC2 Auto Scaling
+User Guide.
 
 # Arguments
 - `auto_scaling_group_name`: The name of the Auto Scaling group.
@@ -447,7 +449,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   waits before checking the health status of an EC2 instance that has come into service and
   marking it unhealthy due to a failed health check. The default value is 0. For more
   information, see Health check grace period in the Amazon EC2 Auto Scaling User Guide.
-  Conditional: Required if you are adding an ELB health check.
+  Required if you are adding an ELB health check.
 - `"HealthCheckType"`: The service to use for the health checks. The valid values are EC2
   (default) and ELB. If you configure an Auto Scaling group to use load balancer (ELB) health
   checks, it considers the instance unhealthy if it fails either the EC2 status checks or the
@@ -2314,17 +2316,19 @@ end
     put_lifecycle_hook(auto_scaling_group_name, lifecycle_hook_name)
     put_lifecycle_hook(auto_scaling_group_name, lifecycle_hook_name, params::Dict{String,<:Any})
 
-Creates or updates a lifecycle hook for the specified Auto Scaling group. A lifecycle hook
-enables an Auto Scaling group to be aware of events in the Auto Scaling instance lifecycle,
-and then perform a custom action when the corresponding lifecycle event occurs. This step
-is a part of the procedure for adding a lifecycle hook to an Auto Scaling group:
-(Optional) Create a Lambda function and a rule that allows Amazon EventBridge to invoke
-your Lambda function when Amazon EC2 Auto Scaling launches or terminates instances.
-(Optional) Create a notification target and an IAM role. The target can be either an Amazon
-SQS queue or an Amazon SNS topic. The role allows Amazon EC2 Auto Scaling to publish
-lifecycle notifications to the target.    Create the lifecycle hook. Specify whether the
-hook is used when the instances launch or terminate.    If you need more time, record the
-lifecycle action heartbeat to keep the instance in a pending state using the
+Creates or updates a lifecycle hook for the specified Auto Scaling group. Lifecycle hooks
+let you create solutions that are aware of events in the Auto Scaling instance lifecycle,
+and then perform a custom action on instances when the corresponding lifecycle event
+occurs. This step is a part of the procedure for adding a lifecycle hook to an Auto Scaling
+group:   (Optional) Create a launch template or launch configuration with a user data
+script that runs while an instance is in a wait state due to a lifecycle hook.   (Optional)
+Create a Lambda function and a rule that allows Amazon EventBridge to invoke your Lambda
+function when an instance is put into a wait state due to a lifecycle hook.   (Optional)
+Create a notification target and an IAM role. The target can be either an Amazon SQS queue
+or an Amazon SNS topic. The role allows Amazon EC2 Auto Scaling to publish lifecycle
+notifications to the target.    Create the lifecycle hook. Specify whether the hook is used
+when the instances launch or terminate.    If you need more time, record the lifecycle
+action heartbeat to keep the instance in a wait state using the
 RecordLifecycleActionHeartbeat API call.   If you finish before the timeout period ends,
 send a callback by using the CompleteLifecycleAction API call.   For more information, see
 Amazon EC2 Auto Scaling lifecycle hooks in the Amazon EC2 Auto Scaling User Guide. If you
@@ -2362,8 +2366,9 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   Auto Scaling sends it a test message. Test messages contain the following additional
   key-value pair: \"Event\": \"autoscaling:TEST_NOTIFICATION\".
 - `"RoleARN"`: The ARN of the IAM role that allows the Auto Scaling group to publish to the
-  specified notification target, for example, an Amazon SNS topic or an Amazon SQS queue.
-  Required for new lifecycle hooks, but optional when updating existing hooks.
+  specified notification target. Valid only if the notification target is an Amazon SNS topic
+  or an Amazon SQS queue. Required for new lifecycle hooks, but optional when updating
+  existing hooks.
 """
 function put_lifecycle_hook(
     AutoScalingGroupName,
@@ -2668,6 +2673,9 @@ pool, you can delete it by calling the DeleteWarmPool API.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"InstanceReusePolicy"`: Indicates whether instances in the Auto Scaling group can be
+  returned to the warm pool on scale in. The default is to terminate instances in the Auto
+  Scaling group when the group scales in.
 - `"MaxGroupPreparedCapacity"`: Specifies the maximum number of instances that are allowed
   to be in the warm pool or in any state except Terminated for the Auto Scaling group. This
   is an optional property. Specify it only if you do not want the warm pool size to be
@@ -2723,16 +2731,18 @@ end
 Records a heartbeat for the lifecycle action associated with the specified token or
 instance. This extends the timeout by the length of time defined using the PutLifecycleHook
 API call. This step is a part of the procedure for adding a lifecycle hook to an Auto
-Scaling group:   (Optional) Create a Lambda function and a rule that allows Amazon
-EventBridge to invoke your Lambda function when Amazon EC2 Auto Scaling launches or
-terminates instances.   (Optional) Create a notification target and an IAM role. The target
-can be either an Amazon SQS queue or an Amazon SNS topic. The role allows Amazon EC2 Auto
-Scaling to publish lifecycle notifications to the target.   Create the lifecycle hook.
-Specify whether the hook is used when the instances launch or terminate.    If you need
-more time, record the lifecycle action heartbeat to keep the instance in a pending state.
- If you finish before the timeout period ends, send a callback by using the
-CompleteLifecycleAction API call.   For more information, see Amazon EC2 Auto Scaling
-lifecycle hooks in the Amazon EC2 Auto Scaling User Guide.
+Scaling group:   (Optional) Create a launch template or launch configuration with a user
+data script that runs while an instance is in a wait state due to a lifecycle hook.
+(Optional) Create a Lambda function and a rule that allows Amazon EventBridge to invoke
+your Lambda function when an instance is put into a wait state due to a lifecycle hook.
+(Optional) Create a notification target and an IAM role. The target can be either an Amazon
+SQS queue or an Amazon SNS topic. The role allows Amazon EC2 Auto Scaling to publish
+lifecycle notifications to the target.   Create the lifecycle hook. Specify whether the
+hook is used when the instances launch or terminate.    If you need more time, record the
+lifecycle action heartbeat to keep the instance in a wait state.    If you finish before
+the timeout period ends, send a callback by using the CompleteLifecycleAction API call.
+For more information, see Amazon EC2 Auto Scaling lifecycle hooks in the Amazon EC2 Auto
+Scaling User Guide.
 
 # Arguments
 - `auto_scaling_group_name`: The name of the Auto Scaling group.
@@ -3237,7 +3247,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   waits before checking the health status of an EC2 instance that has come into service and
   marking it unhealthy due to a failed health check. The default value is 0. For more
   information, see Health check grace period in the Amazon EC2 Auto Scaling User Guide.
-  Conditional: Required if you are adding an ELB health check.
+  Required if you are adding an ELB health check.
 - `"HealthCheckType"`: The service to use for the health checks. The valid values are EC2
   and ELB. If you configure an Auto Scaling group to use ELB health checks, it considers the
   instance unhealthy if it fails either the EC2 status checks or the load balancer health

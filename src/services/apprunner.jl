@@ -65,19 +65,24 @@ end
 Create an App Runner automatic scaling configuration resource. App Runner requires this
 resource when you create App Runner services that require non-default auto scaling
 settings. You can share an auto scaling configuration across multiple services. Create
-multiple revisions of a configuration by using the same AutoScalingConfigurationName and
-different AutoScalingConfigurationRevision values. When you create a service, you can set
-it to use the latest active revision of an auto scaling configuration or a specific
-revision. Configure a higher MinSize to increase the spread of your App Runner service over
-more Availability Zones in the Amazon Web Services Region. The tradeoff is a higher minimal
-cost. Configure a lower MaxSize to control your cost. The tradeoff is lower responsiveness
-during peak demand.
+multiple revisions of a configuration by calling this action multiple times using the same
+AutoScalingConfigurationName. The call returns incremental AutoScalingConfigurationRevision
+values. When you create a service, you can set it to use the latest active revision of an
+auto scaling configuration or a specific revision. Configure a higher MinSize to increase
+the spread of your App Runner service over more Availability Zones in the Amazon Web
+Services Region. The tradeoff is a higher minimal cost. Configure a lower MaxSize to
+control your cost. The tradeoff is lower responsiveness during peak demand.
 
 # Arguments
 - `auto_scaling_configuration_name`: A name for the auto scaling configuration. When you
   use it for the first time in an Amazon Web Services Region, App Runner creates revision
   number 1 of this name. When you use the same name in subsequent calls, App Runner creates
-  incremental revisions of the configuration.
+  incremental revisions of the configuration.  The name DefaultConfiguration is reserved
+  (it's the configuration that App Runner uses if you don't provide a custome one). You can't
+  use it to create a new auto scaling configuration, and you can't create a revision of it.
+  When you want to use your own auto scaling configuration for your App Runner service,
+  create a configuration with a different name, and then provide it when you create or update
+  your service.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
@@ -190,26 +195,29 @@ starts a deployment. This is an asynchronous operation. On a successful call, yo
 the returned OperationId and the ListOperations call to track the operation's progress.
 
 # Arguments
-- `service_name`: A name for the new service. It must be unique across all the running App
-  Runner services in your Amazon Web Services account in the Amazon Web Services Region.
+- `service_name`: A name for the App Runner service. It must be unique across all the
+  running App Runner services in your Amazon Web Services account in the Amazon Web Services
+  Region.
 - `source_configuration`: The source to deploy to the App Runner service. It can be a code
   or an image repository.
 
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"AutoScalingConfigurationArn"`: The Amazon Resource Name (ARN) of an App Runner
-  automatic scaling configuration resource that you want to associate with your service. If
-  not provided, App Runner associates the latest revision of a default auto scaling
-  configuration.
+  automatic scaling configuration resource that you want to associate with the App Runner
+  service. If not provided, App Runner associates the latest revision of a default auto
+  scaling configuration.
 - `"EncryptionConfiguration"`: An optional custom encryption key that App Runner uses to
   encrypt the copy of your source repository that it maintains and your service logs. By
-  default, App Runner uses an Amazon Web Services managed CMK.
+  default, App Runner uses an Amazon Web Services managed key.
 - `"HealthCheckConfiguration"`: The settings for the health check that App Runner performs
-  to monitor the health of your service.
+  to monitor the health of the App Runner service.
 - `"InstanceConfiguration"`: The runtime configuration of instances (scaling units) of the
   App Runner service.
-- `"Tags"`: An optional list of metadata items that you can associate with your service
-  resource. A tag is a key-value pair.
+- `"NetworkConfiguration"`: Configuration settings related to network traffic of the web
+  application that the App Runner service runs.
+- `"Tags"`: An optional list of metadata items that you can associate with the App Runner
+  service resource. A tag is a key-value pair.
 """
 function create_service(
     ServiceName, SourceConfiguration; aws_config::AbstractAWSConfig=global_aws_config()
@@ -237,6 +245,61 @@ function create_service(
                 Dict{String,Any}(
                     "ServiceName" => ServiceName,
                     "SourceConfiguration" => SourceConfiguration,
+                ),
+                params,
+            ),
+        );
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
+    create_vpc_connector(subnets, vpc_connector_name)
+    create_vpc_connector(subnets, vpc_connector_name, params::Dict{String,<:Any})
+
+Create an App Runner VPC connector resource. App Runner requires this resource when you
+want to associate your App Runner service to a custom Amazon Virtual Private Cloud (Amazon
+VPC).
+
+# Arguments
+- `subnets`: A list of IDs of subnets that App Runner should use when it associates your
+  service with a custom Amazon VPC. Specify IDs of subnets of a single Amazon VPC. App Runner
+  determines the Amazon VPC from the subnets you specify.
+- `vpc_connector_name`: A name for the VPC connector.
+
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"SecurityGroups"`: A list of IDs of security groups that App Runner should use for
+  access to Amazon Web Services resources under the specified subnets. If not specified, App
+  Runner uses the default security group of the Amazon VPC. The default security group allows
+  all outbound traffic.
+- `"Tags"`: A list of metadata items that you can associate with your VPC connector
+  resource. A tag is a key-value pair.
+"""
+function create_vpc_connector(
+    Subnets, VpcConnectorName; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return apprunner(
+        "CreateVpcConnector",
+        Dict{String,Any}("Subnets" => Subnets, "VpcConnectorName" => VpcConnectorName);
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function create_vpc_connector(
+    Subnets,
+    VpcConnectorName,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return apprunner(
+        "CreateVpcConnector",
+        Dict{String,Any}(
+            mergewith(
+                _merge,
+                Dict{String,Any}(
+                    "Subnets" => Subnets, "VpcConnectorName" => VpcConnectorName
                 ),
                 params,
             ),
@@ -364,6 +427,45 @@ function delete_service(
 end
 
 """
+    delete_vpc_connector(vpc_connector_arn)
+    delete_vpc_connector(vpc_connector_arn, params::Dict{String,<:Any})
+
+Delete an App Runner VPC connector resource. You can't delete a connector that's used by
+one or more App Runner services.
+
+# Arguments
+- `vpc_connector_arn`: The Amazon Resource Name (ARN) of the App Runner VPC connector that
+  you want to delete. The ARN must be a full VPC connector ARN.
+
+"""
+function delete_vpc_connector(
+    VpcConnectorArn; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return apprunner(
+        "DeleteVpcConnector",
+        Dict{String,Any}("VpcConnectorArn" => VpcConnectorArn);
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function delete_vpc_connector(
+    VpcConnectorArn,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return apprunner(
+        "DeleteVpcConnector",
+        Dict{String,Any}(
+            mergewith(
+                _merge, Dict{String,Any}("VpcConnectorArn" => VpcConnectorArn), params
+            ),
+        );
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
     describe_auto_scaling_configuration(auto_scaling_configuration_arn)
     describe_auto_scaling_configuration(auto_scaling_configuration_arn, params::Dict{String,<:Any})
 
@@ -480,6 +582,44 @@ function describe_service(
         "DescribeService",
         Dict{String,Any}(
             mergewith(_merge, Dict{String,Any}("ServiceArn" => ServiceArn), params)
+        );
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+
+"""
+    describe_vpc_connector(vpc_connector_arn)
+    describe_vpc_connector(vpc_connector_arn, params::Dict{String,<:Any})
+
+Return a description of an App Runner VPC connector resource.
+
+# Arguments
+- `vpc_connector_arn`: The Amazon Resource Name (ARN) of the App Runner VPC connector that
+  you want a description for. The ARN must be a full VPC connector ARN.
+
+"""
+function describe_vpc_connector(
+    VpcConnectorArn; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return apprunner(
+        "DescribeVpcConnector",
+        Dict{String,Any}("VpcConnectorArn" => VpcConnectorArn);
+        aws_config=aws_config,
+        feature_set=SERVICE_FEATURE_SET,
+    )
+end
+function describe_vpc_connector(
+    VpcConnectorArn,
+    params::AbstractDict{String};
+    aws_config::AbstractAWSConfig=global_aws_config(),
+)
+    return apprunner(
+        "DescribeVpcConnector",
+        Dict{String,Any}(
+            mergewith(
+                _merge, Dict{String,Any}("VpcConnectorArn" => VpcConnectorArn), params
+            ),
         );
         aws_config=aws_config,
         feature_set=SERVICE_FEATURE_SET,
@@ -718,6 +858,35 @@ function list_tags_for_resource(
 end
 
 """
+    list_vpc_connectors()
+    list_vpc_connectors(params::Dict{String,<:Any})
+
+Returns a list of App Runner VPC connectors in your Amazon Web Services account.
+
+# Optional Parameters
+Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
+- `"MaxResults"`: The maximum number of results to include in each response (result page).
+  It's used for a paginated request. If you don't specify MaxResults, the request retrieves
+  all available results in a single response.
+- `"NextToken"`: A token from a previous result page. It's used for a paginated request.
+  The request retrieves the next result page. All other parameter values must be identical to
+  the ones that are specified in the initial request. If you don't specify NextToken, the
+  request retrieves the first result page.
+"""
+function list_vpc_connectors(; aws_config::AbstractAWSConfig=global_aws_config())
+    return apprunner(
+        "ListVpcConnectors"; aws_config=aws_config, feature_set=SERVICE_FEATURE_SET
+    )
+end
+function list_vpc_connectors(
+    params::AbstractDict{String}; aws_config::AbstractAWSConfig=global_aws_config()
+)
+    return apprunner(
+        "ListVpcConnectors", params; aws_config=aws_config, feature_set=SERVICE_FEATURE_SET
+    )
+end
+
+"""
     pause_service(service_arn)
     pause_service(service_arn, params::Dict{String,<:Any})
 
@@ -933,11 +1102,14 @@ returned OperationId and the ListOperations call to track the operation's progre
 # Optional Parameters
 Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys are:
 - `"AutoScalingConfigurationArn"`: The Amazon Resource Name (ARN) of an App Runner
-  automatic scaling configuration resource that you want to associate with your service.
+  automatic scaling configuration resource that you want to associate with the App Runner
+  service.
 - `"HealthCheckConfiguration"`: The settings for the health check that App Runner performs
-  to monitor the health of your service.
+  to monitor the health of the App Runner service.
 - `"InstanceConfiguration"`: The runtime configuration to apply to instances (scaling
   units) of the App Runner service.
+- `"NetworkConfiguration"`: Configuration settings related to network traffic of the web
+  application that the App Runner service runs.
 - `"SourceConfiguration"`: The source configuration to apply to the App Runner service. You
   can change the configuration of the code or image repository that the service uses.
   However, you can't switch from code to image or the other way around. This means that you

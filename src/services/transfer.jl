@@ -49,12 +49,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   to the designated home directory (\"chroot\"). To do this, you can set Entry to / and set
   Target to the HomeDirectory parameter value. The following is an Entry and Target pair
   example for chroot.  [ { \"Entry:\": \"/\", \"Target\": \"/bucket_name/home/mydirectory\" }
-  ]   If the target of a logical directory entry does not exist in Amazon S3 or EFS, the
-  entry is ignored. As a workaround, you can use the Amazon S3 API or EFS API to create 0
-  byte objects as place holders for your directory. If using the CLI, use the s3api or efsapi
-  call instead of s3 or efs so you can use the put-object operation. For example, you use the
-  following: aws s3api put-object --bucket bucketname --key path/to/folder/. Make sure that
-  the end of the key name ends in a / for it to be considered a folder.
+  ]
 - `"HomeDirectoryType"`: The type of landing directory (folder) you want your users' home
   directory to be when they log into the server. If you set it to PATH, the user will see the
   absolute Amazon S3 bucket or EFS paths as is in their file transfer protocol clients. If
@@ -179,6 +174,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   Identity and Access Management (IAM) role that allows a server to turn on Amazon CloudWatch
   logging for Amazon S3 or Amazon EFS events. When set, user activity can be viewed in your
   CloudWatch logs.
+- `"PostAuthenticationLoginBanner"`:
+- `"PreAuthenticationLoginBanner"`:
 - `"ProtocolDetails"`: The protocol settings that are configured for your server.  Use the
   PassiveIp parameter to indicate passive mode (for FTP and FTPS protocols). Enter a single
   dotted-quad IPv4 address, such as the external IP address of a firewall, router, or load
@@ -253,12 +250,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   to the designated home directory (\"chroot\"). To do this, you can set Entry to / and set
   Target to the HomeDirectory parameter value. The following is an Entry and Target pair
   example for chroot.  [ { \"Entry:\": \"/\", \"Target\": \"/bucket_name/home/mydirectory\" }
-  ]   If the target of a logical directory entry does not exist in Amazon S3 or EFS, the
-  entry is ignored. As a workaround, you can use the Amazon S3 API or EFS API to create 0
-  byte objects as place holders for your directory. If using the CLI, use the s3api or efsapi
-  call instead of s3 or efs so you can use the put-object operation. For example, you use the
-  following: aws s3api put-object --bucket bucketname --key path/to/folder/. Make sure that
-  the end of the key name ends in a / for it to be considered a folder.
+  ]
 - `"HomeDirectoryType"`: The type of landing directory (folder) you want your users' home
   directory to be when they log into the server. If you set it to PATH, the user will see the
   absolute Amazon S3 bucket or EFS paths as is in their file transfer protocol clients. If
@@ -1440,12 +1432,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   to the designated home directory (\"chroot\"). To do this, you can set Entry to / and set
   Target to the HomeDirectory parameter value. The following is an Entry and Target pair
   example for chroot.  [ { \"Entry:\": \"/\", \"Target\": \"/bucket_name/home/mydirectory\" }
-  ]   If the target of a logical directory entry does not exist in Amazon S3 or EFS, the
-  entry is ignored. As a workaround, you can use the Amazon S3 API or EFS API to create 0
-  byte objects as place holders for your directory. If using the CLI, use the s3api or efsapi
-  call instead of s3 or efs so you can use the put-object operation. For example, you use the
-  following: aws s3api put-object --bucket bucketname --key path/to/folder/. Make sure that
-  the end of the key name ends in a / for it to be considered a folder.
+  ]
 - `"HomeDirectoryType"`: The type of landing directory (folder) you want your users' home
   directory to be when they log into the server. If you set it to PATH, the user will see the
   absolute Amazon S3 bucket or EFS paths as is in their file transfer protocol clients. If
@@ -1553,6 +1540,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   Identity and Access Management (IAM) role that allows a server to turn on Amazon CloudWatch
   logging for Amazon S3 or Amazon EFS events. When set, user activity can be viewed in your
   CloudWatch logs.
+- `"PostAuthenticationLoginBanner"`:
+- `"PreAuthenticationLoginBanner"`:
 - `"ProtocolDetails"`:  The protocol settings that are configured for your server.   Use
   the PassiveIp parameter to indicate passive mode (for FTP and FTPS protocols). Enter a
   single dotted-quad IPv4 address, such as the external IP address of a firewall, router, or
@@ -1630,12 +1619,7 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
   to the designated home directory (\"chroot\"). To do this, you can set Entry to '/' and set
   Target to the HomeDirectory parameter value. The following is an Entry and Target pair
   example for chroot.  [ { \"Entry:\": \"/\", \"Target\": \"/bucket_name/home/mydirectory\" }
-  ]   If the target of a logical directory entry does not exist in Amazon S3 or EFS, the
-  entry is ignored. As a workaround, you can use the Amazon S3 API or EFS API to create 0
-  byte objects as place holders for your directory. If using the CLI, use the s3api or efsapi
-  call instead of s3 or efs so you can use the put-object operation. For example, you use the
-  following: aws s3api put-object --bucket bucketname --key path/to/folder/. Make sure that
-  the end of the key name ends in a / for it to be considered a folder.
+  ]
 - `"HomeDirectoryType"`: The type of landing directory (folder) you want your users' home
   directory to be when they log into the server. If you set it to PATH, the user will see the
   absolute Amazon S3 bucket or EFS paths as is in their file transfer protocol clients. If

@@ -754,6 +754,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"maxResults"`: The maximum number of results to include in the response.
 - `"nextToken"`: The token to use when requesting the next set of results. You received
   this token from a previous ListExperiments operation.
+- `"status"`: Use this optional parameter to limit the returned results to only the
+  experiments with the status that you specify here.
 """
 function list_experiments(project; aws_config::AbstractAWSConfig=global_aws_config())
     return evidently(
@@ -824,6 +826,8 @@ Optional parameters can be passed as a `params::Dict{String,<:Any}`. Valid keys 
 - `"maxResults"`: The maximum number of results to include in the response.
 - `"nextToken"`: The token to use when requesting the next set of results. You received
   this token from a previous ListLaunches operation.
+- `"status"`: Use this optional parameter to limit the returned results to only the
+  launches with the status that you specify here.
 """
 function list_launches(project; aws_config::AbstractAWSConfig=global_aws_config())
     return evidently(
